@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-dotenv.config({path:"/Users/giangpham/Desktop/A-Atlas/.env"}) //would need to change path for your own computer
+dotenv.config(); //would need to change path for your own computer
 
 const mongoUri = process.env.MONGO_URI
 if (!mongoUri){

@@ -25,6 +25,7 @@ if (!cachedMongoObject) {
 }
 
 async function connectToDB() {
+  console.log("Connecting to DB");
   if (cachedMongoObject.connection) {
     return cachedMongoObject.connection;
   }

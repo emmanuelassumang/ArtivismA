@@ -12,10 +12,11 @@ dotenv.config({
   path: path.join(dirname(fileURLToPath(import.meta.url)), "..", "..", ".env"),
 });
 
-const mongoUri = process.env.MONGO_URI;
+// Check for either MONGO_URI or MONGODB_URI (for compatibility)
+const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 if (!mongoUri) {
   throw new Error(
-    "Please define the mongoURI environment variable inside .env"
+    "Please define the MONGO_URI environment variable inside .env"
   );
 }
 

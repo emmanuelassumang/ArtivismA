@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artivism Map</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Add Tailwind CSS from CDN for UI components -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+    
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+    
+    .popup-content {
+      max-width: 300px;
+    }
+    
+    .popup-content h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    
+    .popup-content .image {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      margin: 8px 0;
+      border-radius: 4px;
+    }
+    
+    .popup-content .details {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    
+    .popup-content .location {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .popup-content .interactions {
+      margin-top: 8px;
+      font-size: 12px;
+    }
+    
+    /* Loading spinner */
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+    
+    /* Error message */
+    .error {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: #f44336;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+    
+    /* Filter panel */
+    .filter-panel {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: white;
+      padding: 12px;
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      max-width: 300px;
+      width: 100%;
+    }
+    
+    .filter-panel.collapsed {
+      width: auto;
+      height: auto;
+    }
+    
+    .filter-panel-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+    }
+    
+    .filter-button {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+    
+    .filter-button:hover {
+      background-color: #2563eb;
+    }
+    
+    .reset-button {
+      background-color: #d1d5db;
+      color: #1f2937;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+    
+    .reset-button:hover {
+      background-color: #9ca3af;
+    }
+    
+    /* Search results */
+    .search-results {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      max-width: 300px;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+    }
+    
+    .search-result-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+    
+    .search-result-item:hover {
+      background-color: #f9fafb;
+    }
+    
+    .artwork-count {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #4b5563;
+    }
+    
+    .theme-tag {
+      display: inline-block;
+      background-color: #e5e7eb;
+      color: #374151;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      margin-right: 4px;
+      margin-bottom: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .theme-tag:hover {
+      background-color: #d1d5db;
+    }
+    
+    .theme-tag.active {
+      background-color: #3b82f6;
+      color: white;
+    }
+    
+    /* Legend */
+    .map-legend {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 900;
+      font-size: 12px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="loading" class="loading">Loading map data...</div>
+  <div id="error" class="error" style="display: none;"></div>
+  
+  <!-- Filter Panel -->
+  <div id="filter-panel" class="filter-panel">
+    <h3 class="text-lg font-semibold mb-3">Artivism Map Filters</h3>
+    
+    <!-- City Filter -->
+    <div class="mb-3">
+      <label for="city-filter" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+      <select id="city-filter" class="w-full p-2 border border-gray-300 rounded-md text-sm">
+        <option value="">All Cities</option>
+        <!-- Cities will be dynamically added here -->
+      </select>
+    </div>
+    
+    <!-- Theme Filter -->
+    <div class="mb-3">
+      <label for="theme-filter" class="block text-sm font-medium text-gray-700 mb-1">Theme</label>
+      <select id="theme-filter" class="w-full p-2 border border-gray-300 rounded-md text-sm">
+        <option value="">All Themes</option>
+        <!-- Themes will be dynamically added here -->
+      </select>
+    </div>
+    
+    <!-- Search Box -->
+    <div class="mb-3">
+      <label for="search-input" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+      <input type="text" id="search-input" placeholder="Search by name, artist..." class="w-full p-2 border border-gray-300 rounded-md text-sm">
+    </div>
+    
+    <!-- Popular Themes Tags -->
+    <div class="mb-3">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Popular Themes</label>
+      <div id="theme-tags" class="flex flex-wrap">
+        <!-- Theme tags will be added here -->
+      </div>
+    </div>
+    
+    <!-- Filter Count -->
+    <div id="artwork-count" class="artwork-count">
+      Loading artwork data...
+    </div>
+    
+    <!-- Buttons -->
+    <div class="flex mt-3 gap-2">
+      <button id="reset-button" class="reset-button flex-1">Reset</button>
+      <button id="filter-button" class="filter-button flex-1">Apply Filters</button>
+    </div>
+  </div>
+  
+  <!-- Search Results -->
+  <div id="search-results" class="search-results">
+    <h3 class="text-lg font-semibold mb-2">Search Results</h3>
+    <div id="search-results-container">
+      <!-- Results will be added here -->
+    </div>
+  </div>
+  
+  <!-- Map Legend -->
+  <div id="map-legend" class="map-legend">
+    <h4 class="font-semibold mb-2">Legend</h4>
+    <div id="legend-items">
+      <!-- Legend items will be added here -->
+    </div>
+  </div>
+  
+  <!-- Collapse/Expand Button -->
+  <button id="filter-panel-toggle" class="filter-panel-toggle" title="Toggle Filter Panel">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M3.5 10a.5.5 0 0 1-.5-.5v-8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 0 0 1h2A1.5 1.5 0 0 0 14 9.5v-8A1.5 1.5 0 0 0 12.5 0h-9A1.5 1.5 0 0 0 2 1.5v8A1.5 1.5 0 0 0 3.5 11h2a.5.5 0 0 0 0-1h-2z"/>
+      <path fill-rule="evenodd" d="M7.646 4.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V14.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3z"/>
+    </svg>
+  </button>
+  
+  <!-- Leaflet JavaScript -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <script>
+    // Global variables
+    let allArtworks = [];
+    let filteredArtworks = [];
+    let markers = [];
+    let themeColors = {};
+    let currentFilters = {
+      city: '',
+      theme: '',
+      search: ''
+    };
+    
+    // Initialize the map
+    const map = L.map('map').setView([38.70, -9.20], 10);
+    
+    // Add the tile layer (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Function to strip HTML tags
+    function stripHtml(html) {
+      if (!html) return '';
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      return tmp.textContent || tmp.innerText || '';
+    }
+    
+    // Function to create popup content
+    function createPopupContent(artwork) {
+      let content = `<div class="popup-content">`;
+      
+      // Title
+      content += `<h3>${artwork.name || 'Untitled'}</h3>`;
+      
+      // Image if available
+      if (artwork.image_url) {
+        content += `<img src="${artwork.image_url}" alt="${artwork.name || 'Artwork'}" class="image" onerror="this.style.display='none'">`;
+      }
+      
+      // Artists
+      if (artwork.artists && artwork.artists.length > 0) {
+        content += `<div class="details"><strong>Artist${artwork.artists.length > 1 ? 's' : ''}: </strong>${artwork.artists.join(', ')}</div>`;
+      }
+      
+      // Themes
+      if (artwork.themes && artwork.themes.length > 0) {
+        content += `<div class="details"><strong>Theme${artwork.themes.length > 1 ? 's' : ''}: </strong>${artwork.themes.join(', ')}</div>`;
+      }
+      
+      // Description
+      if (artwork.description) {
+        content += `<div class="details">${stripHtml(artwork.description)}</div>`;
+      }
+      
+      // Location
+      content += `<div class="location">${artwork.location.city || ''}${artwork.location.address ? `, ${artwork.location.address}` : ''}</div>`;
+      
+      // Interactions
+      if (artwork.interactions) {
+        content += `<div class="interactions">❤️ ${artwork.interactions.likes_count || 0} | 💬 ${artwork.interactions.comments?.length || 0}</div>`;
+      }
+      
+      content += `</div>`;
+      return content;
+    }
+    
+    // Generate a color for a theme
+    function getThemeColor(theme) {
+      if (!themeColors[theme]) {
+        // Generate a random pastel color
+        const hue = Math.floor(Math.random() * 360);
+        themeColors[theme] = `hsl(${hue}, 70%, 70%)`;
+      }
+      return themeColors[theme];
+    }
+    
+    // Function to create a marker with appropriate icon based on theme
+    function createMarker(artwork) {
+      if (!artwork.location || !artwork.location.coordinates) return null;
+      
+      const theme = artwork.themes && artwork.themes.length > 0 ? artwork.themes[0] : null;
+      let marker;
+      
+      if (theme) {
+        const color = getThemeColor(theme);
+        const icon = L.divIcon({
+          className: 'custom-marker',
+          html: `<div style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`,
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
+        });
+        
+        marker = L.marker(artwork.location.coordinates, { icon });
+      } else {
+        marker = L.marker(artwork.location.coordinates);
+      }
+      
+      marker.bindPopup(createPopupContent(artwork));
+      marker.artworkData = artwork; // Attach artwork data to marker for filtering
+      
+      return marker;
+    }
+    
+    // Function to update markers based on filters
+    function updateMarkers() {
+      // Clear existing markers
+      markers.forEach(marker => map.removeLayer(marker));
+      markers = [];
+      
+      // Apply filters
+      filteredArtworks = allArtworks.filter(artwork => {
+        // City filter
+        if (currentFilters.city && artwork.location && artwork.location.city) {
+          if (artwork.location.city.toLowerCase() !== currentFilters.city.toLowerCase()) {
+            return false;
+          }
+        }
+        
+        // Theme filter
+        if (currentFilters.theme && artwork.themes) {
+          if (!artwork.themes.some(theme => theme.toLowerCase() === currentFilters.theme.toLowerCase())) {
+            return false;
+          }
+        }
+        
+        // Search filter
+        if (currentFilters.search) {
+          const searchTerm = currentFilters.search.toLowerCase();
+          const nameMatch = artwork.name && artwork.name.toLowerCase().includes(searchTerm);
+          const descMatch = artwork.description && stripHtml(artwork.description).toLowerCase().includes(searchTerm);
+          const artistMatch = artwork.artists && artwork.artists.some(artist => artist.toLowerCase().includes(searchTerm));
+          const cityMatch = artwork.location && artwork.location.city && artwork.location.city.toLowerCase().includes(searchTerm);
+          
+          if (!(nameMatch || descMatch || artistMatch || cityMatch)) {
+            return false;
+          }
+        }
+        
+        return true;
+      });
+      
+      // Add filtered markers to map
+      filteredArtworks.forEach(artwork => {
+        const marker = createMarker(artwork);
+        if (marker) {
+          marker.addTo(map);
+          markers.push(marker);
+        }
+      });
+      
+      // Update artwork count
+      document.getElementById('artwork-count').textContent = `${filteredArtworks.length} artwork${filteredArtworks.length === 1 ? '' : 's'} found`;
+      
+      // Fit map to bounds if we have markers
+      if (markers.length > 0) {
+        const group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds(), { padding: [50, 50] });
+      }
+    }
+    
+    // Function to populate filter dropdowns
+    function populateFilters() {
+      const cityFilter = document.getElementById('city-filter');
+      const themeFilter = document.getElementById('theme-filter');
+      const themeTags = document.getElementById('theme-tags');
+      
+      // Get unique cities
+      const cities = [...new Set(allArtworks
+        .filter(art => art.location && art.location.city)
+        .map(art => art.location.city))];
+      
+      // Sort alphabetically
+      cities.sort();
+      
+      // Add city options
+      cities.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city;
+        option.textContent = city.charAt(0).toUpperCase() + city.slice(1); // Capitalize
+        cityFilter.appendChild(option);
+      });
+      
+      // Get unique themes
+      const themes = [];
+      allArtworks.forEach(art => {
+        if (art.themes && art.themes.length) {
+          art.themes.forEach(theme => {
+            if (!themes.includes(theme)) {
+              themes.push(theme);
+            }
+          });
+        }
+      });
+      
+      // Sort by frequency
+      const themeCounts = {};
+      allArtworks.forEach(art => {
+        if (art.themes && art.themes.length) {
+          art.themes.forEach(theme => {
+            themeCounts[theme] = (themeCounts[theme] || 0) + 1;
+          });
+        }
+      });
+      
+      themes.sort((a, b) => themeCounts[b] - themeCounts[a]);
+      
+      // Add theme options
+      themes.forEach(theme => {
+        const option = document.createElement('option');
+        option.value = theme;
+        option.textContent = theme;
+        themeFilter.appendChild(option);
+      });
+      
+      // Add popular theme tags (top 5)
+      themes.slice(0, 5).forEach(theme => {
+        const tag = document.createElement('span');
+        tag.className = 'theme-tag';
+        tag.textContent = theme;
+        tag.style.backgroundColor = getThemeColor(theme);
+        tag.style.color = 'white';
+        tag.dataset.theme = theme;
+        
+        // Add click handler to quickly filter
+        tag.addEventListener('click', () => {
+          document.getElementById('theme-filter').value = theme;
+          currentFilters.theme = theme;
+          updateMarkers();
+          
+          // Update active state
+          document.querySelectorAll('.theme-tag').forEach(t => t.classList.remove('active'));
+          tag.classList.add('active');
+        });
+        
+        themeTags.appendChild(tag);
+      });
+      
+      // Populate legend
+      populateLegend(themes.slice(0, 8)); // Show top 8 themes in legend
+    }
+    
+    // Function to populate the legend
+    function populateLegend(themes) {
+      const legendContainer = document.getElementById('legend-items');
+      
+      // Clear existing
+      legendContainer.innerHTML = '';
+      
+      // Add items for top themes
+      themes.forEach(theme => {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        
+        const colorBox = document.createElement('div');
+        colorBox.className = 'legend-color';
+        colorBox.style.backgroundColor = getThemeColor(theme);
+        
+        const label = document.createElement('span');
+        label.textContent = theme;
+        
+        item.appendChild(colorBox);
+        item.appendChild(label);
+        legendContainer.appendChild(item);
+      });
+    }
+    
+    // Set up event listeners
+    document.getElementById('filter-button').addEventListener('click', () => {
+      currentFilters.city = document.getElementById('city-filter').value;
+      currentFilters.theme = document.getElementById('theme-filter').value;
+      currentFilters.search = document.getElementById('search-input').value;
+      
+      updateMarkers();
+    });
+    
+    document.getElementById('reset-button').addEventListener('click', () => {
+      // Reset filter UI
+      document.getElementById('city-filter').value = '';
+      document.getElementById('theme-filter').value = '';
+      document.getElementById('search-input').value = '';
+      
+      // Reset filter state
+      currentFilters.city = '';
+      currentFilters.theme = '';
+      currentFilters.search = '';
+      
+      // Reset theme tags
+      document.querySelectorAll('.theme-tag').forEach(tag => {
+        tag.classList.remove('active');
+      });
+      
+      updateMarkers();
+    });
+    
+    // Toggle filter panel
+    document.getElementById('filter-panel-toggle').addEventListener('click', () => {
+      const panel = document.getElementById('filter-panel');
+      panel.classList.toggle('collapsed');
+      
+      if (panel.classList.contains('collapsed')) {
+        panel.style.display = 'none';
+      } else {
+        panel.style.display = 'block';
+      }
+    });
+    
+    // Search input
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', () => {
+      const searchTerm = searchInput.value.toLowerCase();
+      
+      if (searchTerm.length >= 2) {
+        // Search for matching artworks
+        const results = allArtworks.filter(art => {
+          const nameMatch = art.name && art.name.toLowerCase().includes(searchTerm);
+          const descMatch = art.description && stripHtml(art.description).toLowerCase().includes(searchTerm);
+          const artistMatch = art.artists && art.artists.some(artist => artist.toLowerCase().includes(searchTerm));
+          const cityMatch = art.location && art.location.city && art.location.city.toLowerCase().includes(searchTerm);
+          
+          return nameMatch || descMatch || artistMatch || cityMatch;
+        }).slice(0, 5); // Limit to top 5 matches
+        
+        if (results.length > 0) {
+          showSearchResults(results);
+        } else {
+          hideSearchResults();
+        }
+      } else {
+        hideSearchResults();
+      }
+    });
+    
+    // Function to show search results
+    function showSearchResults(results) {
+      const container = document.getElementById('search-results-container');
+      container.innerHTML = '';
+      
+      results.forEach(art => {
+        const item = document.createElement('div');
+        item.className = 'search-result-item';
+        item.innerHTML = `
+          <div class="font-medium">${art.name || 'Untitled'}</div>
+          <div class="text-xs text-gray-500">${art.location.city || ''}</div>
+        `;
+        
+        item.addEventListener('click', () => {
+          // Find the marker for this artwork
+          const marker = markers.find(m => m.artworkData._id === art._id);
+          if (marker) {
+            map.setView(marker.getLatLng(), 15);
+            marker.openPopup();
+          }
+          hideSearchResults();
+        });
+        
+        container.appendChild(item);
+      });
+      
+      document.getElementById('search-results').style.display = 'block';
+    }
+    
+    // Function to hide search results
+    function hideSearchResults() {
+      document.getElementById('search-results').style.display = 'none';
+    }
+    
+    // Click outside to hide search results
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#search-results') && !e.target.closest('#search-input')) {
+        hideSearchResults();
+      }
+    });
+    
+    // Fetch artwork data
+    fetch('/api/get_all')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Remove loading indicator
+        document.getElementById('loading').style.display = 'none';
+        
+        if (!data.artworks || !Array.isArray(data.artworks) || data.artworks.length === 0) {
+          throw new Error('No artwork data available');
+        }
+        
+        // Store all artworks
+        allArtworks = data.artworks;
+        filteredArtworks = allArtworks;
+        
+        // Populate filters
+        populateFilters();
+        
+        // Show artworks on map
+        updateMarkers();
+      })
+      .catch(error => {
+        console.error('Error loading artwork data:', error);
+        
+        // Remove loading indicator
+        document.getElementById('loading').style.display = 'none';
+        
+        // Show error message
+        const errorElement = document.getElementById('error');
+        errorElement.textContent = 'Error loading map data: ' + error.message;
+        errorElement.style.display = 'block';
+        
+        // Add a fallback marker
+        L.marker([38.70, -9.20])
+          .addTo(map)
+          .bindPopup('Error loading artwork data. This is a default location.')
+          .openPopup();
+      });
+  </script>
+</body>
+</html>

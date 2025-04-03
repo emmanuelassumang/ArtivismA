@@ -1,5 +1,5 @@
 // src/pages/api/art/theme/theme_name.js
-import connectToDB from "../../../../db/mongodb";
+import connectToDB from "../../../../utils/dbConnect";
 
 export default async function handler(req, res) {
   if (req.method === "GET") {

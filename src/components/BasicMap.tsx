@@ -56,7 +56,7 @@ export default function BasicMap() {
           // Create markers for each artwork
           data.artworks.forEach(art => {
             if (art.location && art.location.coordinates) {
-              // Create marker
+              // In clean_data.js, coordinates are already stored as [latitude, longitude]
               const marker = L.marker(art.location.coordinates).addTo(map);
               
               // Create popup content

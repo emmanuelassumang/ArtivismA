@@ -204,7 +204,20 @@ export default function TourDetailPage({ params }: { params: { id: string } | Pr
           <h2 className="text-xl font-semibold text-gray-800 p-6 pb-0">Tour Map</h2>
           <p className="text-gray-500 text-sm px-6 pb-4">Follow this route to discover all artworks in this tour.</p>
           <div className="h-96">
-            <TourMap artworks={tour.artwork_details || []} />
+            {/* Check if we have artwork details with proper coordinates */}
+            {tour.artwork_details && tour.artwork_details.length > 0 ? (
+              <TourMap artworks={tour.artwork_details} />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center bg-gray-100 text-gray-500">
+                <div className="text-center p-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  </svg>
+                  <p>Could not load artwork locations for this tour.</p>
+                  <p className="text-sm mt-2">The tour contains {tour.artworks.length} artwork references.</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -224,13 +237,24 @@ export default function TourDetailPage({ params }: { params: { id: string } | Pr
                       alt={artwork.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        // Fallback for broken images
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=No+Image';
+                        // Use a local fallback instead of external placeholder
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        const parent = (e.target as HTMLImageElement).parentElement;
+                        if (parent) {
+                          // Create a fallback element with the first letter of the artwork name
+                          const nameInitial = (artwork.name || "Art").charAt(0).toUpperCase();
+                          const fallback = document.createElement('div');
+                          fallback.className = 'w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-300';
+                          fallback.innerHTML = `<span class="text-5xl font-bold">${nameInitial}</span>`;
+                          parent.appendChild(fallback);
+                        }
                       }}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      No image available
+                    <div className="w-full h-full flex items-center justify-center bg-indigo-100">
+                      <span className="text-5xl font-bold text-indigo-300">
+                        {(artwork.name || "Art").charAt(0).toUpperCase()}
+                      </span>
                     </div>
                   )}
                   <div className="absolute top-2 left-2 bg-indigo-600 text-white text-xs font-medium px-2 py-1 rounded-full">

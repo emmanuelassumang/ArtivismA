@@ -690,8 +690,8 @@
       }
     });
     
-    // Fetch artwork data
-    fetch('/api/get_all')
+    // Fetch artwork data - requesting all 500 artworks explicitly
+    fetch('/api/get_all?limit=500')
       .then(response => {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);

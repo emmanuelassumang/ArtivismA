@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 interface Artwork {
   _id: string;
@@ -19,6 +19,13 @@ export default function TourMap({ artworks }: TourMapProps) {
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const pathRef = useRef<any>(null);
+  const [mounted, setMounted] = useState<boolean>(false);
+  
+  // Set mounted flag after component mounts
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
   
   // Check if the artworks array has valid coordinates
   const validArtworks = artworks.filter(
@@ -27,26 +34,13 @@ export default function TourMap({ artworks }: TourMapProps) {
   
   // Load the map when the component mounts
   useEffect(() => {
-    // Log the artworks passed to the component
-    console.log('TourMap: Artworks passed to component:', artworks);
-    console.log('TourMap: Valid artworks with coordinates:', validArtworks);
-    
-    // Exit early if window is not available (SSR) or if no valid artworks
-    if (typeof window === 'undefined' || validArtworks.length === 0) {
-      console.log('TourMap: Exiting early, window undefined or no valid artworks', { 
-        windowDefined: typeof window !== 'undefined',
-        artworksLength: artworks.length,
-        validArtworksLength: validArtworks.length
-      });
+    // Exit early if component is not mounted, window is not available (SSR) or if no valid artworks
+    if (!mounted || typeof window === 'undefined' || validArtworks.length === 0) {
       return;
     }
     
-    console.log('TourMap: Starting map initialization with artworks:', artworks);
-    
     // Dynamic import to avoid SSR issues
     import('leaflet').then((L) => {
-      console.log('TourMap: Leaflet loaded successfully');
-      
       // Fix Leaflet icon issues
       delete (L.Icon.Default.prototype as any)._getIconUrl;
       L.Icon.Default.mergeOptions({
@@ -58,11 +52,8 @@ export default function TourMap({ artworks }: TourMapProps) {
       // Find the container element
       const container = document.getElementById(mapContainerId);
       if (!container) {
-        console.error('TourMap: Container not found for ID:', mapContainerId);
         return;
       }
-      
-      console.log('TourMap: Container found, initializing map');
       
       // Initialize the map with a default view (will be adjusted later)
       if (!mapRef.current) {
@@ -96,31 +87,36 @@ export default function TourMap({ artworks }: TourMapProps) {
       // Add markers and collect coordinates
       const coordinates: [number, number][] = [];
       
-      console.log('TourMap: Adding markers for artworks:', validArtworks);
       
       validArtworks.forEach((artwork, index) => {
         // We've already filtered for valid artworks, but check again just to be safe
         if (!artwork.location || !artwork.location.coordinates) {
-          console.error('TourMap: Missing location data for artwork:', artwork);
           return;
         }
         
-        let coords = artwork.location.coordinates;
+        // Get original coordinates
+        const origCoords = artwork.location.coordinates;
         
-        // Check if coordinates need to be swapped for Leaflet
-        // Leaflet expects [latitude, longitude] order
-        // MongoDB typically stores as [longitude, latitude]
-        // Latitude ranges from -90 to 90, longitude from -180 to 180
-        const [coord1, coord2] = coords;
+        // Extract latitude and longitude based on how data is stored in the database (clean_data.js)
+        // In clean_data.js, coordinates are stored as [latitude, longitude]
+        let lat = parseFloat(origCoords[0]);
+        let lng = parseFloat(origCoords[1]);
         
-        // If first coordinate is outside latitude range, swap them
-        if (Math.abs(coord1) > 90 && Math.abs(coord2) <= 90) {
-          coords = [coord2, coord1]; // Swap to [lat, lng] for Leaflet
-          console.log(`TourMap: Swapped coordinates for marker #${index + 1}`);
+        // Verify extracted values are valid numbers
+        if (isNaN(lat) || isNaN(lng)) {
+          return; // Skip this artwork
         }
         
-        console.log(`TourMap: Adding marker #${index + 1} at coordinates:`, coords);
-        coordinates.push(coords);
+        // Verify valid coordinate ranges
+        if (Math.abs(lng) > 180 || Math.abs(lat) > 90) {
+          return; // Skip this artwork
+        }
+
+        // Create the Leaflet coordinates (already in Leaflet [lat, lng] format since the database stores them this way)
+        const leafletCoords: [number, number] = [lat, lng];
+        
+        // Add to the coordinates array for the path
+        coordinates.push(leafletCoords);
         
         // Create custom icon with number
         const icon = L.divIcon({
@@ -132,7 +128,7 @@ export default function TourMap({ artworks }: TourMapProps) {
         });
         
         // Create marker
-        const marker = L.marker(coords, { icon });
+        const marker = L.marker(leafletCoords, { icon });
         
         // Add popup
         marker.bindPopup(`<div>
@@ -147,7 +143,6 @@ export default function TourMap({ artworks }: TourMapProps) {
       
       // Add path between markers
       if (coordinates.length > 1) {
-        console.log('TourMap: Creating path between markers with coordinates:', coordinates);
         pathRef.current = L.polyline(coordinates, {
           color: '#4f46e5',
           weight: 3,
@@ -158,10 +153,7 @@ export default function TourMap({ artworks }: TourMapProps) {
       
       // Fit map to bounds
       if (coordinates.length > 0) {
-        console.log('TourMap: Fitting map to bounds with coordinates:', coordinates);
         mapRef.current.fitBounds(coordinates, { padding: [30, 30] });
-      } else {
-        console.warn('TourMap: No valid coordinates to set map bounds');
       }
     });
     
@@ -172,7 +164,7 @@ export default function TourMap({ artworks }: TourMapProps) {
         mapRef.current = null;
       }
     };
-  }, [artworks, mapContainerId]);
+  }, [artworks, mapContainerId, mounted]);
   
   return (
     <div id={mapContainerId} className="h-full w-full">

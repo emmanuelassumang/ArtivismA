@@ -1,6 +1,6 @@
 // Get all artworks with flexible search parameters
 // GET request with optional parameters: city, theme, artist, keyword
-import connectToDB from "../../../db/mongodb";
+import connectToDB from "../../../utils/dbConnect";
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
@@ -10,9 +10,10 @@ export default async function handler(req, res) {
         theme, 
         artist, 
         keyword,
-        limit = 100,
+        limit = 500,
         page = 1 
       } = req.query;
+      
       
       const skip = (parseInt(page) - 1) * parseInt(limit);
       
@@ -53,22 +54,8 @@ export default async function handler(req, res) {
       const mongooseInstance = await connectToDB();
       const db = mongooseInstance.connection.db;
       
-      // Check available collections
-      const collections = await db.listCollections().toArray();
-      const collectionNames = collections.map(c => c.name);
-      console.log(`[API] Available collections:`, collectionNames);
-      
       // Determine the correct collection name
-      let artCollectionName = "arts";
-      if (!collectionNames.includes("arts")) {
-        const artCollections = collectionNames.filter(name => 
-          name.toLowerCase().includes("art") && name !== "tours"
-        );
-        if (artCollections.length > 0) {
-          artCollectionName = artCollections[0];
-          console.log(`[API] Using "${artCollectionName}" collection instead of "arts"`);
-        }
-      }
+      const artCollectionName = "arts";
 
       // Get total count for pagination
       const totalCount = await db.collection(artCollectionName).countDocuments(filter);

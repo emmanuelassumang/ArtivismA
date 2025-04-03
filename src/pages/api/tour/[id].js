@@ -1,6 +1,6 @@
 // edit and delete tour by id
 // Required fields: user_id
-import connectToDB from "../../../db/mongodb";
+import connectToDB from "../../../utils/dbConnect";
 import { ObjectId } from "mongodb";
 
 export default async function handler(req, res) {
@@ -47,18 +47,11 @@ export default async function handler(req, res) {
             }
           }
           
-          // Convert string IDs to ObjectIds where needed
-          const artworkIds = tour.artworks.map(id => {
-            try {
-              return new ObjectId(id);
-            } catch (e) {
-              console.warn(`[API] Could not convert artwork ID to ObjectId: ${id}, error:`, e.message);
-              return id; // Keep as is if not convertible
-            }
-          });
+          // Don't convert IDs - we know they're strings from our earlier check
+          const artworkIds = tour.artworks;
+          console.log(`[API] Using artwork IDs as strings:`, artworkIds);
 
-          console.log(`[API] Converted artwork IDs:`, artworkIds);
-
+          // Query directly with string IDs since that's how they're stored
           const artworks = await db.collection(artCollectionName).find({
             _id: { $in: artworkIds }
           }).toArray();

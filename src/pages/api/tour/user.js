@@ -1,6 +1,6 @@
 // View all tours created by a user
 // Required fields: user_id
-import connectToDB from "../../../db/mongodb";
+import connectToDB from "../../../utils/dbConnect";
 import { ObjectId } from "mongodb";
 
 export default async function handler(req, res) {

@@ -92,6 +92,7 @@ function getMarkerIcon(theme: string): Icon {
 export default function MapComponents({ artworks, center, zoom, mapKey }: MapComponentsProps) {
   const [activeMarkerId, setActiveMarkerId] = useState<string | null>(null);
   const [markerRefs, setMarkerRefs] = useState<Record<string, LeafletMarker>>({});
+  
 
   // Register marker references to allow programmatic popup opening
   const registerMarker = (id: string, marker: LeafletMarker) => {
@@ -153,7 +154,7 @@ export default function MapComponents({ artworks, center, zoom, mapKey }: MapCom
         return (
           <Marker 
             key={art._id} 
-            position={art.location.coordinates}
+            position={[art.location.coordinates[0], art.location.coordinates[1]]}
             icon={markerIcon}
             eventHandlers={{
               click: () => handleMarkerClick(art._id),

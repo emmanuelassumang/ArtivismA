@@ -1,7 +1,7 @@
 // createTour API endpoint
 // POST request to create a new tour
 // Required fields: user_id, tour_name, city, artworks
-import connectToDB from "../../../db/mongodb";
+import connectToDB from "../../../utils/dbConnect";
 import { ObjectId } from "mongodb";
 
 export default async function handler(req, res) {
@@ -52,13 +52,23 @@ export default async function handler(req, res) {
   } else if (req.method === "POST") {
     try {
       const { user_id, tour_name, city, description, artworks, visibility } = req.body;
+      console.log('[API] Creating tour with data:', { 
+        user_id, 
+        tour_name, 
+        city, 
+        artworksCount: artworks?.length || 0,
+        visibility 
+      });
+      
       if (!user_id || !tour_name || !city || !artworks) {
         return res.status(400).json({ error: "Missing required fields" });
       }
 
       // Establish connection and get the DB object
+      console.log('[API] Connecting to MongoDB for tour creation...');
       const mongooseInstance = await connectToDB();
       const db = mongooseInstance.connection.db;
+      console.log('[API] Connected to database:', db.databaseName);
       
       // Process artwork IDs to ensure they're valid
       const processedArtworks = [];
@@ -103,13 +113,21 @@ export default async function handler(req, res) {
         visibility: visibility || "public"
       };
 
+      console.log('[API] Saving new tour to database:', {
+        tourName: newTour.tour_name,
+        city: newTour.city,
+        artworksCount: newTour.artworks.length
+      });
+      
       const result = await db.collection("tours").insertOne(newTour);
+      console.log('[API] Tour saved successfully with ID:', result.insertedId);
       
       // Try to update user record if users collection exists
       try {
         const collections = await db.listCollections({name: "users"}).toArray();
         if (collections.length > 0) {
           // Update or create user record
+          console.log('[API] Updating user record for user_id:', user_id);
           await db.collection("users").updateOne(
             { user_id: user_id },
             { 
@@ -121,6 +139,7 @@ export default async function handler(req, res) {
             },
             { upsert: true }
           );
+          console.log('[API] User record updated successfully');
         }
       } catch (userError) {
         console.warn("Could not update user record:", userError.message);

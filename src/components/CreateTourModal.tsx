@@ -145,13 +145,34 @@ export default function CreateTourModal({ isOpen, onClose, onTourCreated, userId
       
       const data = await response.json();
       
+      console.log('City API response:', {
+        artworksCount: data.artworks?.length || 0,
+        hasError: !!data.error,
+        error: data.error
+      });
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
       if (data.artworks && Array.isArray(data.artworks)) {
+        // Check if there's sample data to debug
+        if (data.artworks.length > 0) {
+          console.log('Sample artwork from API:', {
+            name: data.artworks[0].name,
+            location: data.artworks[0].location,
+            id: data.artworks[0]._id
+          });
+        }
+        
         // Extract and deduplicate cities
         const cities = Array.from(new Set(
           data.artworks
             .filter((art: any) => art.location && art.location.city)
             .map((art: any) => art.location.city)
         )).sort();
+        
+        console.log('Found cities:', cities.length > 0 ? cities : 'No cities found');
         
         setAvailableCities(cities);
       }
@@ -165,6 +186,7 @@ export default function CreateTourModal({ isOpen, onClose, onTourCreated, userId
   const fetchArtworksForCity = async (city: string) => {
     try {
       setFetchingArtworks(true);
+      console.log(`Fetching artworks for city: ${city}`);
       
       const response = await fetch(`/api/art/search?city=${encodeURIComponent(city)}`);
       if (!response.ok) {
@@ -172,11 +194,31 @@ export default function CreateTourModal({ isOpen, onClose, onTourCreated, userId
       }
       
       const data = await response.json();
+      console.log('Artwork search response:', {
+        artworksCount: data.artworks?.length || 0,
+        hasError: !!data.error,
+        error: data.error,
+        city: data.filters?.city
+      });
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
       
       if (data.artworks && Array.isArray(data.artworks)) {
+        console.log(`Found ${data.artworks.length} artworks for city: ${city}`);
+        if (data.artworks.length > 0) {
+          console.log('Sample artwork:', {
+            name: data.artworks[0].name,
+            id: data.artworks[0]._id,
+            location: data.artworks[0].location
+          });
+        }
+        
         setArtworks(data.artworks);
         setFilteredArtworks(data.artworks);
       } else {
+        console.log(`No artworks found for city: ${city}`);
         setArtworks([]);
         setFilteredArtworks([]);
       }
@@ -401,7 +443,7 @@ export default function CreateTourModal({ isOpen, onClose, onTourCreated, userId
                     </div>
                     
                     <div>
-                      <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="citySearch" className="block text-sm font-medium text-gray-700 mb-1">
                         City *
                       </label>
                       <div className="relative">

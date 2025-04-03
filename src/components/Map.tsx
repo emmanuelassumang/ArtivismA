@@ -62,7 +62,6 @@ export default function MapComponent() {
         }
         
         const data = await res.json();
-        
         // Extract unique cities and themes for filters
         const uniqueCities = [...new Set(data.artworks.map((art: Artwork) => 
           art.location?.city ? (art.location.city.charAt(0).toUpperCase() + art.location.city.slice(1)) : "Unknown"
@@ -120,6 +119,7 @@ export default function MapComponent() {
       // Calculate the average center of filtered artworks
       const validArtworks = filtered.filter(art => art.location && art.location.coordinates);
       if (validArtworks.length > 0) {
+        // In clean_data.js, coordinates are stored as [latitude, longitude]
         const totalLat = validArtworks.reduce((sum, art) => sum + art.location.coordinates[0], 0);
         const totalLng = validArtworks.reduce((sum, art) => sum + art.location.coordinates[1], 0);
         const avgLat = totalLat / validArtworks.length;
@@ -132,6 +132,7 @@ export default function MapComponent() {
       // If no filtered results, use first artwork as center
       const validArtworks = artworks.filter(art => art.location && art.location.coordinates);
       if (validArtworks.length > 0) {
+        // In clean_data.js, coordinates are already stored as [latitude, longitude]
         setMapCenter(validArtworks[0].location.coordinates);
         setMapZoom(10);
       }

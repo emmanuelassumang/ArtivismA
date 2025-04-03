@@ -1,5 +1,5 @@
 // API for saving a tour.
-import connectToDB from "../../../db/mongodb";
+import connectToDB from "../../../utils/dbConnect";
 
 export default async function handler(req, res) {
   if (req.method === "POST") {

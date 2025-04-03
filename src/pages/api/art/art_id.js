@@ -1,1 +1,0 @@
-// ftech specific artwork details

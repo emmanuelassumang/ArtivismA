@@ -67,7 +67,7 @@ const Navbar = () => {
             <div className="hidden md:flex space-x-6">
               {[
                 { href: '/', label: 'Home' },
-                { href: '/', label: 'Gallery' },
+                { href: '/gallery', label: 'Gallery' },
                 { href: '/map', label: 'Map' },
                 { href: '/tours', label: 'Tours' },
                 { href: '/#about', label: 'About', isAnchor: true }

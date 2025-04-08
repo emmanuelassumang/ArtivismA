@@ -1,7 +1,6 @@
 {
-  "/map/page": "app/map/page.js",
   "/art/[artworkId]/page": "app/art/[artworkId]/page.js",
+  "/map/page": "app/map/page.js",
   "/gallery/page": "app/gallery/page.js",
-  "/tours/[id]/page": "app/tours/[id]/page.js",
   "/page": "app/page.js"
 }

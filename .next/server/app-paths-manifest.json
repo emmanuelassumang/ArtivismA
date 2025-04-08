@@ -1,6 +1,4 @@
 {
-  "/tours/page": "app/tours/page.js",
-  "/page": "app/page.js",
-  "/tours/[id]/page": "app/tours/[id]/page.js",
-  "/map/page": "app/map/page.js"
+  "/map/page": "app/map/page.js",
+  "/page": "app/page.js"
 }

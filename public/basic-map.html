@@ -352,8 +352,8 @@
       content += `<h3>${artwork.name || 'Untitled'}</h3>`;
       
       // Image if available
-      if (artwork.image_url) {
-        content += `<img src="${artwork.image_url}" alt="${artwork.name || 'Artwork'}" class="image" onerror="this.style.display='none'">`;
+      if (artwork.artwork_url) {
+        content += `<img src="${artwork.artwork_url}" alt="${artwork.name || 'Artwork'}" class="image" onerror="this.style.display='none'">`;
       }
       
       // Artists

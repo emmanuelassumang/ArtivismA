@@ -10,6 +10,7 @@ interface Artwork {
   name: string;
   description: string;
   image_url?: string;
+  artwork_url?: string;
   location: {
     coordinates: [number, number];
     city: string;
@@ -303,9 +304,9 @@ export default function EditTourPage({ params }: { params: { id: string } | Prom
                       onClick={() => toggleArtwork(artwork._id)}
                     >
                       <div className="relative h-40 bg-gray-200">
-                        {artwork.image_url ? (
+                        {artwork.artwork_url ? (
                           <img
-                            src={artwork.image_url}
+                            src={artwork.artwork_url}
                             alt={artwork.name}
                             className="w-full h-full object-cover"
                             onError={(e) => {

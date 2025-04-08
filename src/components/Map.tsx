@@ -24,6 +24,7 @@ interface Artwork {
   artists?: string[];
   themes?: string[];
   image_url?: string;
+  artwork_url?: string;
   location: {
     coordinates: [number, number];
     city: string;

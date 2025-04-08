@@ -2,6 +2,7 @@ from pymongo import MongoClient
 import requests
 from bs4 import BeautifulSoup
 import time
+import re
 
 client = MongoClient("mongodb+srv://robin:robin@artivism.ofccb.mongodb.net/?retryWrites=true&w=majority&appName=Artivism")  # change this if needed
 db = client["artivism"]
@@ -36,23 +37,24 @@ def get_image_url(artwork_page_url):
         print(f"Failed to fetch {artwork_page_url}: {e}")
         return None
 
-# Query documents missing image_url
-docs = collection.find({"image_url": None})
+docs = collection.find({"artwork_url": {"$exists": False}})
 
 for doc in docs:
-    artwork_url = doc["artwork_url"]
-    print(f"Processing: {artwork_url}")
-    image_url = get_image_url(artwork_url)
+    image_page_url = doc["image_url"]
+    print(f"Processing: {image_page_url}")
+    artwork_url = get_image_url(image_page_url)
+    print(artwork_url)
 
-    if image_url:
+    if artwork_url:
         collection.update_one(
             {"_id": doc["_id"]},
-            {"$set": {"image_url": image_url}}
+            {"$set": {"artwork_url": artwork_url}}
         )
-        print(f"Updated image URL: {image_url}")
+        print(f"Updated artwork URL: {artwork_url} with {image_page_url}")
+    time.sleep(1)  
 
-    time.sleep(1)  # Be polite
-
-test_url = "https://streetartcities.com/markers/88cbed63-27d6-404e-a1d7-cbf2b094d4b6"  # replace with any real artwork URL
-result = get_image_url(test_url)
-print("Extracted image URL:", result)
+# Standalone test
+if __name__ == "__main__":
+    test_url = "https://streetartcities.com/markers/302f303d-b5cd-4061-9712-a517a3a2af5b"
+    artwork_url = get_image_url(test_url)
+    print("Extracted artwork URL:", artwork_url)

@@ -12,7 +12,9 @@ const Navbar = () => {
   const isLightBgPage =
   pathname === "/map" ||
   pathname.startsWith("/tours") ||
+  pathname.startsWith("/art") ||
   pathname === "/about" ||
+  pathname === "/gallery" ||
   pathname === "/#about";
 
   useEffect(() => {
@@ -65,6 +67,7 @@ const Navbar = () => {
             <div className="hidden md:flex space-x-6">
               {[
                 { href: '/', label: 'Home' },
+                { href: '/', label: 'Gallery' },
                 { href: '/map', label: 'Map' },
                 { href: '/tours', label: 'Tours' },
                 { href: '/#about', label: 'About', isAnchor: true }

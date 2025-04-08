@@ -26,10 +26,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/tours/[id]/page.js"
     ],
-    "/_not-found/page": [
+    "/art/[artworkId]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/chunks/app/art/[artworkId]/page.js"
+    ],
+    "/gallery/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/gallery/page.js"
     ]
   }
 }

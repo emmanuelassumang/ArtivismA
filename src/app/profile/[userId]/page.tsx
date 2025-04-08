@@ -13,9 +13,13 @@ interface User {
   profile_created_at: string;
   liked_arts: string[];
   created_tours: string[];
+  bio?: string;
 }
 
 interface Artwork {
+  _id: string;
+  name?: string;
+  artists?: string[];
   artwork_url?: string;
 }
 
@@ -31,7 +35,10 @@ export default function ProfilePage() {
   const { userId } = useParams();
   const [user, setUser] = useState<User | null>(null);
   const [createdTours, setCreatedTours] = useState<Tour[]>([]);
+  const [likedArtworks, setLikedArtworks] = useState<Artwork[]>([]);
   const [loading, setLoading] = useState(true);
+  const [bio, setBio] = useState<string>("");
+  const [editingBio, setEditingBio] = useState(false);
 
   useEffect(() => {
     async function fetchUser() {
@@ -42,10 +49,18 @@ export default function ProfilePage() {
         if (!userData.user) throw new Error("User not found");
 
         setUser(userData.user);
+        setBio(userData.user.bio || "");
 
         const toursRes = await fetch(`/api/tour/user?user_id=${userData.user.user_id}`);
         const toursData = await toursRes.json();
         setCreatedTours(toursData.tours);
+
+        if (userData.user.liked_arts?.length > 0) {
+          const artsRes = await fetch("/api/art/search?limit=1000");
+          const artsData = await artsRes.json();
+          const liked = artsData.artworks.filter((a: Artwork) => userData.user.liked_arts.includes(a._id));
+          setLikedArtworks(liked);
+        }
       } catch (err) {
         console.error("Failed to fetch user profile or tours:", err);
       } finally {
@@ -55,6 +70,22 @@ export default function ProfilePage() {
 
     if (userId) fetchUser();
   }, [userId]);
+
+  const handleBioSave = async () => {
+    if (!user) return;
+
+    try {
+      await fetch(`/api/users/${user._id}/bio`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bio })
+      });
+      setEditingBio(false);
+      setUser((prev) => prev ? { ...prev, bio } : prev);
+    } catch (err) {
+      console.error("Failed to update bio:", err);
+    }
+  };
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -78,8 +109,38 @@ export default function ProfilePage() {
           <h2 className="text-2xl font-semibold text-indigo-800 mb-6">Your Profile</h2>
           <ul className="space-y-4 text-gray-700">
             <li><strong>Email:</strong> {user.email}</li>
+            <li><strong>City:</strong> {user.city || "Not specified"}</li>
             <li><strong>Liked Artworks:</strong> {user.liked_arts?.length || 0}</li>
             <li><strong>Created Tours:</strong> {user.created_tours?.length || 0}</li>
+            <li>
+              <strong>Bio:</strong>
+              {editingBio ? (
+                <div className="mt-2">
+                  <textarea
+                    className="w-full border rounded p-2 text-sm"
+                    rows={3}
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                  />
+                  <button
+                    onClick={handleBioSave}
+                    className="mt-2 bg-indigo-600 text-white py-1 px-4 rounded text-sm"
+                  >
+                    Save
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-700">{user.bio || "No bio provided."}</p>
+                  <button
+                    onClick={() => setEditingBio(true)}
+                    className="mt-1 text-indigo-600 text-sm"
+                  >
+                    Edit Bio
+                  </button>
+                </div>
+              )}
+            </li>
           </ul>
         </div>
       </section>
@@ -119,6 +180,34 @@ export default function ProfilePage() {
           </div>
         ) : (
           <p className="text-center text-gray-500">You haven't created any tours yet.</p>
+        )}
+      </section>
+
+      {/* Liked Artworks Grid */}
+      <section className="container mx-auto px-6 pb-20">
+        <h2 className="text-2xl font-semibold text-indigo-800 mb-6 text-center">Liked Artworks</h2>
+        {likedArtworks.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {likedArtworks.map((art) => (
+              <div key={art._id} className="bg-white shadow-sm rounded-lg overflow-hidden">
+                <div className="h-32 bg-gray-100">
+                  <img
+                    src={art.artwork_url || "https://via.placeholder.com/300x200?text=No+Image"}
+                    alt={art.name || "Artwork"}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-3">
+                  <h3 className="text-sm font-semibold text-indigo-700 line-clamp-1">{art.name || "Untitled"}</h3>
+                  {art.artists?.length > 0 && (
+                    <p className="text-xs text-gray-500 line-clamp-1">{art.artists.join(", ")}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500">You haven't liked any artworks yet.</p>
         )}
       </section>
     </main>

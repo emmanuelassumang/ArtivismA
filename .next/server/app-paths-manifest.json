@@ -1,8 +1,6 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/tours/[id]/page": "app/tours/[id]/page.js",
-  "/profile/[userId]/page": "app/profile/[userId]/page.js",
-  "/tours/page": "app/tours/page.js",
+  "/art/[artworkId]/page": "app/art/[artworkId]/page.js",
   "/map/page": "app/map/page.js",
+  "/gallery/page": "app/gallery/page.js",
   "/page": "app/page.js"
 }

@@ -1,4 +1,8 @@
 // /api/auth/login
+import connectToDB from "../../../db/mongodb";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
 export default async function handler(req, res) {
   if (req.method === "POST") {
     try {
@@ -8,9 +12,9 @@ export default async function handler(req, res) {
       }
 
       const mongooseInstance = await connectToDB();
-      const db = mongooseInstance.connection.db;
-
-      const user = await db.collection("users").findOne({ email });
+      // const db = mongooseInstance.connection.db;
+      const db = mongooseInstance.connection.useDb("artivism");
+      const user = await db.collection("users").findOne({ email: email });
       if (!user) {
         return res.status(400).json({ error: "User not found" });
       }

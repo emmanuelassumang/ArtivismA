@@ -71,7 +71,8 @@ const Navbar = () => {
                 { href: '/', label: 'Home' },
                 { href: '/map', label: 'Map' },
                 { href: '/tours', label: 'Tours' },
-                { href: '/#about', label: 'About', isAnchor: true }
+                { href: '/#about', label: 'About' },
+                { href: '/profile', label: 'Profile', isAnchor: true }
               ].map((link) => (
                 <React.Fragment key={link.href}>
                   {link.isAnchor ? (

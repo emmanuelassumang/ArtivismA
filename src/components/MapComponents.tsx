@@ -24,6 +24,7 @@ interface Artwork {
   artists?: string[];
   themes?: string[];
   image_url?: string;
+  artwork_url?: string;
   location: {
     coordinates: [number, number];
     city: string;
@@ -165,10 +166,11 @@ export default function MapComponents({ artworks, center, zoom, mapKey }: MapCom
               <div className="artwork-popup">
                 <h3 className="font-bold text-xl mb-2 text-indigo-900">{art.name || "Untitled"}</h3>
                 
-                {art.image_url ? (
+                {art.artwork_url ? (
                   <div className="relative w-full h-40 overflow-hidden rounded-lg mb-3 shadow-sm">
+                    <p className="text-xs text-red-500 break-all">{art.artwork_url}</p>
                     <img 
-                      src={art.image_url} 
+                      src={art.artwork_url} 
                       alt={art.name} 
                       className="w-full h-full object-cover transition-transform hover:scale-110 duration-500"
                       onError={(e) => {

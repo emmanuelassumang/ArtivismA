@@ -14,6 +14,7 @@ interface Artwork {
   artists?: string[];
   themes?: string[];
   image_url?: string;
+  artwork_url?: string;
   description?: string;
 }
 
@@ -741,9 +742,9 @@ export default function CreateTourModal({ isOpen, onClose, onTourCreated, userId
                                 <div className="flex p-3 cursor-pointer">
                                   {/* Artwork image or fallback */}
                                   <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0 bg-gray-100 relative">
-                                    {artwork.image_url ? (
+                                    {artwork.artwork_url ? (
                                       <img 
-                                        src={artwork.image_url} 
+                                        src={artwork.artwork_url} 
                                         alt={artwork.name || "Artwork"} 
                                         className="w-full h-full object-cover"
                                         onError={(e) => {

@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
+    "bcryptjs": "^3.0.2",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2",
     "leaflet": "^1.9.4",
     "mongodb": "^6.13.1",
     "mongoose": "^8.8.2",

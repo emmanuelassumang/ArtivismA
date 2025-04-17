@@ -108,54 +108,58 @@ const Navbar = () => {
             </div>
 
             {/* CTA */}
-            <div className="hidden md:block">
-              <Link
-                href="/map"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-5 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
-              >
-                Explore Map
-              </Link>
+            <div className=" hidden md:flex space-x-4">
+              <div className="hidden md:block">
+                <Link
+                  href="/map"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-5 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                >
+                  Explore Map
+                </Link>
+              </div>
 
-              <Link
-                href="/login"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-5 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+              <div className="hidden md:block">
+                <Link
+                  href="/login"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-5 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+                >
+                  Log In
+                </Link>
+              </div>
+
+              {/* Mobile Menu Icon */}
+              <button
+                className="md:hidden transition-transform duration-300 hover:rotate-180"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="Toggle menu"
               >
-                Log In
-              </Link>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-6 w-6 ${
+                    isScrolled || isLightBgPage ? "text-gray-900" : "text-white"
+                  }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  {isMenuOpen ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  ) : (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  )}
+                </svg>
+              </button>
             </div>
-
-            {/* Mobile Menu Icon */}
-            <button
-              className="md:hidden transition-transform duration-300 hover:rotate-180"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`h-6 w-6 ${
-                  isScrolled || isLightBgPage ? "text-gray-900" : "text-white"
-                }`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                {isMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
-            </button>
           </div>
         </div>
       </nav>

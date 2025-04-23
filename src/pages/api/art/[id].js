@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   try {
     const mongooseInstance = await connectToDB();
     const db = mongooseInstance.connection.db;
-
+    
     // Since your _id is a string, use it directly
     const artwork = await db.collection("arts").findOne({ _id: id });
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { UserIcon } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 
@@ -14,7 +14,9 @@ interface DecodedToken {
 
 const Navbar = () => {
   const [userId, setUserId] = useState<string | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -28,6 +30,13 @@ const Navbar = () => {
       }
     }
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUserId(null);
+    setIsDropdownOpen(false);
+    router.push("/login");
+  };
 
   const isLightBgPage =
     pathname === "/map" ||
@@ -76,7 +85,7 @@ const Navbar = () => {
         </div>
 
         {/* CTA and Profile */}
-        <div className="hidden md:flex space-x-4 items-center">
+        <div className="hidden md:flex space-x-4 items-center relative">
           {/* Explore Map button */}
           <Link
             href="/map"
@@ -86,12 +95,41 @@ const Navbar = () => {
           </Link>
 
           {/* Profile Icon */}
-          <Link
-            href={userId ? `/profile/${userId}` : "/login"}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-md flex items-center justify-center h-10 w-10"
-          >
-            <UserIcon className="h-5 w-5" />
-          </Link>
+          {userId ? (
+            <div className="relative">
+              <button
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-md flex items-center justify-center h-10 w-10"
+              >
+                <UserIcon className="h-5 w-5" />
+              </button>
+
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg">
+                  <Link
+                    href={`/profile/${userId}`}
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    My Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-md flex items-center justify-center h-10 w-10"
+            >
+              <UserIcon className="h-5 w-5" />
+            </Link>
+          )}
         </div>
       </div>
     </nav>

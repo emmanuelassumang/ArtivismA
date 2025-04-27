@@ -27,8 +27,6 @@ export default function Login() {
       alert(`Log in failed: ${data.error || "Try again."}`);
     }
   };
-  
-  
 
   const router = useRouter();
   return (

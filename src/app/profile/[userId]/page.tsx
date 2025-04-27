@@ -51,9 +51,12 @@ export default function ProfilePage() {
         setUser(userData.user);
         setBio(userData.user.bio || "");
 
-        const toursRes = await fetch(`/api/tour/user?user_id=${userData.user.user_id}`);
-        const toursData = await toursRes.json();
-        setCreatedTours(toursData.tours);
+        if (userData.user.created_tours?.length > 0) {
+          const ids = userData.user.created_tours.join(",");
+          const toursRes = await fetch(`/api/tour/many?ids=${ids}`);
+          const toursData = await toursRes.json();
+          setCreatedTours(toursData.tours);
+        }        
 
         if (userData.user.liked_arts?.length > 0) {
           const artsRes = await fetch("/api/art/search?limit=1000");
@@ -150,33 +153,36 @@ export default function ProfilePage() {
         <h2 className="text-2xl font-semibold text-indigo-800 mb-6 text-center">Created Tours</h2>
         {createdTours.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {createdTours.map((tour) => {
-              const image = tour.artwork_details?.[0]?.artwork_url;
-              return (
-                <div key={tour._id} className="bg-white rounded-lg shadow hover:shadow-md transition">
-                  <div className="relative h-40 bg-gray-100 overflow-hidden rounded-t-lg">
-                    <img
-                      src={image || "https://via.placeholder.com/300x200?text=No+Image"}
-                      alt={tour.tour_name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-lg font-bold text-indigo-700">{tour.tour_name}</h3>
-                    <p className="text-sm text-gray-600">{tour.city}</p>
-                    {tour.description && (
-                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">{tour.description}</p>
-                    )}
-                    <Link
-                      href={`/tours/${tour._id}`}
-                      className="text-indigo-600 mt-2 inline-block text-sm font-medium"
-                    >
-                      View Tour →
-                    </Link>
-                  </div>
-                </div>
-              );
-            })}
+
+{createdTours.map((tour) => {
+  const image = "https://placehold.co/300x200?text=Art+Tour";
+
+  return (
+    <div key={tour._id} className="bg-white rounded-lg shadow hover:shadow-md transition">
+      <div className="relative h-40 bg-gray-100 overflow-hidden rounded-t-lg">
+        <img
+          src={image}
+          alt={tour.tour_name}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="p-4">
+        <h3 className="text-lg font-bold text-indigo-700">{tour.tour_name}</h3>
+        <p className="text-sm text-gray-600">{tour.city}</p>
+        {tour.description && (
+          <p className="text-sm text-gray-500 mt-1 line-clamp-2">{tour.description}</p>
+        )}
+        <Link
+          href={`/tours/${tour._id}`}
+          className="text-indigo-600 mt-2 inline-block text-sm font-medium"
+        >
+          View Tour →
+        </Link>
+      </div>
+    </div>
+  );
+})}
+
           </div>
         ) : (
           <p className="text-center text-gray-500">You haven't created any tours yet.</p>

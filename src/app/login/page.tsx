@@ -9,21 +9,22 @@ export default function Login() {
 
   const handleLogIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+  
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-
-    //need to verify user details (log in route) and retrieve user information (get user route)
+  
+    const data = await res.json();
+  
     if (res.ok) {
       const data = await res.json();
       localStorage.setItem("authToken", data.token);
       router.push("/map");
     } else {
-      const errorData = await res.json();
-      console.error("Log in failed:", errorData);
-      alert(`Log in failed: ${errorData.message || "Try again."}`);
+      console.error("Log in failed:", data);
+      alert(`Log in failed: ${data.error || "Try again."}`);
     }
   };
 

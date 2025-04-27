@@ -10,10 +10,7 @@ export default function ToursPage() {
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Temporary user ID until we implement authentication
-  const tempUserId = "user123";
-  
+
   // Fetch tours on component mount
   useEffect(() => {
     async function fetchTours() {
@@ -32,13 +29,13 @@ export default function ToursPage() {
         setLoading(false);
       }
     }
-    
+
     fetchTours();
   }, []);
-  
+
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
-  
+
   const handleTourCreated = (newTour) => {
     setTours(prev => [newTour, ...prev]);
     handleCloseModal();
@@ -65,7 +62,7 @@ export default function ToursPage() {
           </button>
         </div>
       </div>
-      
+
       {/* Tours list */}
       <div className="container mx-auto px-6 py-10">
         {loading ? (
@@ -99,16 +96,15 @@ export default function ToursPage() {
             </button>
           </div>
         ) : (
-          <TourList tours={tours} currentUserId={tempUserId} onUpdate={(updatedTours) => setTours(updatedTours)} />
+          <TourList tours={tours} onUpdate={(updatedTours) => setTours(updatedTours)} />
         )}
       </div>
-      
+
       {/* Create tour modal */}
       <CreateTourModal 
         isOpen={isModalOpen} 
         onClose={handleCloseModal} 
         onTourCreated={handleTourCreated}
-        userId={tempUserId}
       />
     </div>
   );

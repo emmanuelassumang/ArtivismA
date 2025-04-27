@@ -19,9 +19,8 @@ export default function Login() {
     const data = await res.json();
   
     if (res.ok) {
-      const data = await res.json();
-      localStorage.setItem("authToken", data.token);
-      router.push("/map");
+      localStorage.setItem("token", data.token);
+      window.location.href = "/map";
     } else {
       console.error("Log in failed:", data);
       alert(`Log in failed: ${data.error || "Try again."}`);

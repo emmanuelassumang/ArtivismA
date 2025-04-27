@@ -34,7 +34,7 @@ export default function ArtworkPage() {
     }
 
     async function fetchUser() {
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("token");
       console.log(token);
       if (token) {
         const decodedToken = jwtDecode<CustomJwtPayload>(token);

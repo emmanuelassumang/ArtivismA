@@ -18,7 +18,7 @@ export default function Login() {
     //need to verify user details (log in route) and retrieve user information (get user route)
     if (res.ok) {
       const data = await res.json();
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("authToken", data.token);
       router.push("/map");
     } else {
       const errorData = await res.json();

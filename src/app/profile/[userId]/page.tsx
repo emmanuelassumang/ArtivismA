@@ -188,34 +188,6 @@ export default function ProfilePage() {
           <p className="text-center text-gray-500">You haven't created any tours yet.</p>
         )}
       </section>
-
-      {/* Liked Artworks Grid */}
-      <section className="container mx-auto px-6 pb-20">
-        <h2 className="text-2xl font-semibold text-indigo-800 mb-6 text-center">Liked Artworks</h2>
-        {likedArtworks.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {likedArtworks.map((art) => (
-              <div key={art._id} className="bg-white shadow-sm rounded-lg overflow-hidden">
-                <div className="h-32 bg-gray-100">
-                  <img
-                    src={art.artwork_url || "https://via.placeholder.com/300x200?text=No+Image"}
-                    alt={art.name || "Artwork"}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-3">
-                  <h3 className="text-sm font-semibold text-indigo-700 line-clamp-1">{art.name || "Untitled"}</h3>
-                  {art.artists?.length > 0 && (
-                    <p className="text-xs text-gray-500 line-clamp-1">{art.artists.join(", ")}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-gray-500">You haven't liked any artworks yet.</p>
-        )}
-      </section>
     </main>
   );
 }

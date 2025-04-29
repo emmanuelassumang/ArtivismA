@@ -3,6 +3,7 @@
 // Required fields: user_id, tour_name, city, artworks
 import connectToDB from "../../../utils/dbConnect";
 import { ObjectId } from "mongodb";
+import jwt from "jsonwebtoken";
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
@@ -51,16 +52,28 @@ export default async function handler(req, res) {
     }
   } else if (req.method === "POST") {
     try {
-      const { user_id, tour_name, city, description, artworks, visibility } = req.body;
+      // const { user_id, tour_name, city, description, artworks, visibility } = req.body;
+
+      const authHeader = req.headers.authorization;
+
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "No token provided" });
+      }
+
+      const token = authHeader.split(" ")[1];
+      const decoded = jwt.verify(token, "your_secret_key"); 
+      const userId = decoded.userId;
+
+      const { tour_name, city, description, artworks, visibility } = req.body;
+
       console.log('[API] Creating tour with data:', { 
-        user_id, 
         tour_name, 
         city, 
         artworksCount: artworks?.length || 0,
         visibility 
       });
       
-      if (!user_id || !tour_name || !city || !artworks) {
+      if (!userId || !tour_name || !city || !artworks) {
         return res.status(400).json({ error: "Missing required fields" });
       }
 
@@ -103,7 +116,7 @@ export default async function handler(req, res) {
       }
 
       const newTour = {
-        user_id,
+        user_id: userId,
         tour_name,
         city,
         description: description || "",
@@ -120,6 +133,11 @@ export default async function handler(req, res) {
       });
       
       const result = await db.collection("tours").insertOne(newTour);
+      await db.collection("users").updateOne(
+        { _id: new ObjectId(userId) },
+        { $push: { created_tours: result.insertedId } }
+      );
+      
       console.log('[API] Tour saved successfully with ID:', result.insertedId);
       
       // Try to update user record if users collection exists

@@ -22,10 +22,9 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onTourCreated: (tour: any) => void;
-  userId: string;
 }
 
-export default function CreateTourModal({ isOpen, onClose, onTourCreated, userId }: Props) {
+export default function CreateTourModal({ isOpen, onClose, onTourCreated }: Props) {
   // Tour data
   const [tourName, setTourName] = useState('');
   const [city, setCity] = useState('');
@@ -258,7 +257,6 @@ export default function CreateTourModal({ isOpen, onClose, onTourCreated, userId
       
       // Prepare tour data
       const tourData = {
-        user_id: userId,
         tour_name: tourName,
         city,
         description,
@@ -267,12 +265,20 @@ export default function CreateTourModal({ isOpen, onClose, onTourCreated, userId
       };
       
       // Submit to API
+      const token = localStorage.getItem('token');
       const response = await fetch('/api/tour', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, 
         },
-        body: JSON.stringify(tourData),
+        body: JSON.stringify({
+          tour_name: tourName,
+          city,
+          description,
+          artworks: selectedArtworks.map((art) => art._id),
+          visibility,
+        }),
       });
       
       if (!response.ok) {

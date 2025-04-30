@@ -1,7 +1,7 @@
 import {faker} from "@faker-js/faker"
 import {MongoClient, ObjectId} from "mongodb"
 import dotenv from "dotenv";
-dotenv.config({path:"/Users/giangpham/Desktop/A-Atlas/.env"}) //would need to change path for your own computer
+dotenv.config();
 
 function randomIntFromInterval(min, max) { // min and max included 
     return Math.floor(Math.random() * (max - min + 1) + min);

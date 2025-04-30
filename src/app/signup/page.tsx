@@ -22,7 +22,9 @@ export default function SignUp() {
     if (res.ok) {
       const data = await res.json();
       localStorage.setItem("token", data.token);
-      router.push("/map");
+      // Get user ID from JWT
+      const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
+      router.push(`/profile/${tokenPayload.userId}`);
     } else {
       const errorData = await res.json();
       console.error("Sign-up failed:", errorData);

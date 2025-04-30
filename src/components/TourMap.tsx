@@ -55,23 +55,37 @@ export default function TourMap({ artworks }: TourMapProps) {
         return;
       }
       
-      // Initialize the map with a default view (will be adjusted later)
+      // Get center coordinates from the first valid artwork (or fallback to NYC)
+      let initialCenter: [number, number] = [40.7128, -74.0060]; // Default NYC coordinates
+      
+      if (validArtworks.length > 0 && validArtworks[0].location?.coordinates) {
+        const firstCoords = validArtworks[0].location.coordinates;
+        const lat = parseFloat(firstCoords[0]);
+        const lng = parseFloat(firstCoords[1]);
+        
+        if (!isNaN(lat) && !isNaN(lng) && 
+            Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+          initialCenter = [lat, lng];
+        }
+      }
+      
+      // Initialize the map with a view centered on the first artwork
       if (!mapRef.current) {
-        // If no valid coordinates found, use a default center
         const defaultOptions = {
-          center: [0, 0], // Default center (will be overridden later)
-          zoom: 2,        // Default zoom level
-          attributionControl: true
+          center: initialCenter,
+          zoom: 10,        // Default zoom level
+          minZoom: 2,      // Minimum zoom level
+          maxZoom: 18,     // Maximum zoom level
+          attributionControl: true,
+          preferCanvas: true // Better performance for many markers
         };
         
         mapRef.current = L.map(mapContainerId, defaultOptions);
-        console.log('TourMap: Map instance created');
         
         // Add tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(mapRef.current);
-        console.log('TourMap: Tile layer added');
       }
       
       // Clear existing markers and path
@@ -151,10 +165,16 @@ export default function TourMap({ artworks }: TourMapProps) {
         }).addTo(mapRef.current);
       }
       
-      // Fit map to bounds
-      if (coordinates.length > 0) {
-        mapRef.current.fitBounds(coordinates, { padding: [30, 30] });
-      }
+      // Fit map to bounds with null check
+      setTimeout(() => {
+        if (mapRef.current && coordinates.length > 0) {
+          try {
+            mapRef.current.fitBounds(coordinates, { padding: [30, 30] });
+          } catch (error) {
+            console.error("Error fitting bounds:", error);
+          }
+        }
+      }, 200); // Small delay to ensure map is initialized
     });
     
     // Clean up on unmount

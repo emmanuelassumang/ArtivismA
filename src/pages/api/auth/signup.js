@@ -34,11 +34,21 @@ export default async function handler(req, res) {
 
       const result = await db.collection("users").insertOne(newUser);
 
-      const token = jwt.sign({ userId: result.insertedId }, "your_secret_key", {
+      const token = jwt.sign({ 
+        userId: result.insertedId,
+        username: username
+      }, "your_secret_key", {
         expiresIn: "7d",
       });
 
-      return res.status(201).json({ message: "User registered", token });
+      return res.status(201).json({ 
+        message: "User registered", 
+        token,
+        user: {
+          _id: result.insertedId,
+          username: username
+        }
+      });
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }

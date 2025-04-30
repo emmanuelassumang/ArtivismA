@@ -1,12 +1,12 @@
 import connectToDB from "../../../utils/dbConnect";
 import { ObjectId } from "mongodb";
 
-// Route handler for liking an artwork
+// Route handler for liking/unliking an artwork
 export default async function handler(req, res) {
   if (req.method === "POST") {
     try {
-      const { artworkId, userId } = req.body; // Get artworkId and userId from the request body
-      console.log("[API] Incoming request to like artwork:", artworkId, userId);
+      const { artworkId, userId, action = 'like' } = req.body; // Get artworkId and userId from the request body
+      console.log(`[API] Incoming request to ${action} artwork:`, artworkId, userId);
       // Validate the input
       if (!artworkId || !userId) {
         return res.status(400).json({ error: "Missing artworkId or userId" });
@@ -23,24 +23,65 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: "Artwork not found" });
       }
 
-      // Step 2: Check if the user has already liked this artwork
-      if (artwork.likes.includes(userId)) {
-        return res
-          .status(400)
-          .json({ error: "You have already liked this artwork" });
+      // Initialize likes array if it doesn't exist
+      if (!artwork.likes) {
+        await db.collection("arts").updateOne(
+          { _id: artworkId },
+          { $set: { likes: [] } }
+        );
       }
 
-      // Step 3: Add the userId to the artwork's likes array
-      const updateResult = await db.collection("arts").updateOne(
-        { _id: artworkId },
-        { $push: { likes: userId } } // Add userId to likes array
-      );
+      // Handle like action
+      if (action === 'like') {
+        // Check if the user has already liked this artwork
+        if (artwork.likes && artwork.likes.includes(userId)) {
+          return res
+            .status(400)
+            .json({ error: "You have already liked this artwork" });
+        }
 
-      // If the update was successful
-      if (updateResult.modifiedCount > 0) {
-        return res.status(200).json({ message: "Artwork liked successfully" });
+        // Add the userId to the artwork's likes array
+        const updateResult = await db.collection("arts").updateOne(
+          { _id: artworkId },
+          { $push: { likes: userId } } // Add userId to likes array
+        );
+
+        // If the update was successful
+        if (updateResult.modifiedCount > 0) {
+          return res.status(200).json({ 
+            message: "Artwork liked successfully",
+            action: "like" 
+          });
+        } else {
+          return res.status(500).json({ error: "Failed to like artwork" });
+        }
+      } 
+      // Handle unlike action
+      else if (action === 'unlike') {
+        // Check if the user has already liked this artwork
+        if (!artwork.likes || !artwork.likes.includes(userId)) {
+          return res
+            .status(400)
+            .json({ error: "You haven't liked this artwork yet" });
+        }
+
+        // Remove the userId from the artwork's likes array
+        const updateResult = await db.collection("arts").updateOne(
+          { _id: artworkId },
+          { $pull: { likes: userId } } // Remove userId from likes array
+        );
+
+        // If the update was successful
+        if (updateResult.modifiedCount > 0) {
+          return res.status(200).json({ 
+            message: "Artwork unliked successfully",
+            action: "unlike" 
+          });
+        } else {
+          return res.status(500).json({ error: "Failed to unlike artwork" });
+        }
       } else {
-        return res.status(500).json({ error: "Failed to like artwork" });
+        return res.status(400).json({ error: "Invalid action" });
       }
     } catch (error) {
       console.error(error);

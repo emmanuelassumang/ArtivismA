@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import Navbar from "../components/Navbar";
+import AccessibilityMenu from "../components/AccessibilityMenu";
+import { AccessibilityProvider } from "../components/AccessibilityContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,13 +29,42 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Navbar />
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <AccessibilityProvider>
+            <Navbar />
+            {children}
+            <AccessibilityMenu />
+          </AccessibilityProvider>
+        </ThemeProvider>
+        
+        {/* Script to apply saved preferences immediately on load */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  // Apply grayscale if saved
+                  if (localStorage.getItem('greyscale') === 'true') {
+                    document.documentElement.classList.add('greyscale');
+                  }
+                  
+                  // Apply font size if saved
+                  const savedFontSize = localStorage.getItem('fontSize');
+                  if (savedFontSize) {
+                    document.documentElement.style.fontSize = \`\${savedFontSize}rem\`;
+                  }
+                } catch (e) {
+                  console.error('Error applying saved accessibility preferences:', e);
+                }
+              })();
+            `,
+          }}
+        />
       </body>
     </html>
   );

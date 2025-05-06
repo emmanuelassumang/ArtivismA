@@ -61,115 +61,106 @@ export default async function handler(req, res) {
       }
 
       const token = authHeader.split(" ")[1];
-      const decoded = jwt.verify(token, "your_secret_key"); 
-      const userId = decoded.userId;
-
-      const { tour_name, city, description, artworks, visibility } = req.body;
-
-      console.log('[API] Creating tour with data:', { 
-        tour_name, 
-        city, 
-        artworksCount: artworks?.length || 0,
-        visibility 
-      });
       
-      if (!userId || !tour_name || !city || !artworks) {
-        return res.status(400).json({ error: "Missing required fields" });
+      if (!token) {
+        return res.status(401).json({ error: "Invalid token format" });
       }
+      
+      try {
+        const decoded = jwt.verify(token, "your_secret_key"); 
+        const userId = decoded.userId;
 
-      // Establish connection and get the DB object
-      console.log('[API] Connecting to MongoDB for tour creation...');
-      const mongooseInstance = await connectToDB();
-      const db = mongooseInstance.connection.db;
-      console.log('[API] Connected to database:', db.databaseName);
-      
-      // Process artwork IDs to ensure they're valid
-      const processedArtworks = [];
-      
-      // Check if artworks exist before creating the tour
-      for (const id of artworks) {
-        // First try as string ID
-        let artwork = await db.collection("arts").findOne({ _id: id });
+        const { tour_name, city, description, artworks, visibility } = req.body;
+
+        console.log('[API] Creating tour with data:', { 
+          tour_name, 
+          city, 
+          artworksCount: artworks?.length || 0,
+          visibility 
+        });
         
-        // If not found and looks like ObjectId, try converting
-        if (!artwork && id.length === 24 && /^[0-9a-fA-F]{24}$/.test(id)) {
-          try {
-            const objectId = new ObjectId(id);
-            artwork = await db.collection("arts").findOne({ _id: objectId });
-            if (artwork) {
-              processedArtworks.push(objectId);
-              continue;
+        if (!userId || !tour_name || !city || !artworks) {
+          return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        // Establish connection and get the DB object
+        console.log('[API] Connecting to MongoDB for tour creation...');
+        const mongooseInstance = await connectToDB();
+        const db = mongooseInstance.connection.db;
+        console.log('[API] Connected to database:', db.databaseName);
+        
+        // Process artwork IDs to ensure they're valid
+        const processedArtworks = [];
+        
+        // Check if artworks exist before creating the tour
+        for (const id of artworks) {
+          // First try as string ID
+          let artwork = await db.collection("arts").findOne({ _id: id });
+          
+          // If not found and looks like ObjectId, try converting
+          if (!artwork && id.length === 24 && /^[0-9a-fA-F]{24}$/.test(id)) {
+            try {
+              const objectId = new ObjectId(id);
+              artwork = await db.collection("arts").findOne({ _id: objectId });
+              if (artwork) {
+                processedArtworks.push(objectId);
+                continue;
+              }
+            } catch (err) {
+              console.warn(`Invalid artwork ID format: ${id}`);
             }
-          } catch (err) {
-            console.warn(`Invalid artwork ID format: ${id}`);
+          }
+          
+          // If found as string, use as is
+          if (artwork) {
+            processedArtworks.push(id);
           }
         }
         
-        // If found as string, use as is
-        if (artwork) {
-          processedArtworks.push(id);
+        if (processedArtworks.length === 0) {
+          return res.status(400).json({ error: "No valid artwork IDs provided" });
         }
-      }
-      
-      if (processedArtworks.length === 0) {
-        return res.status(400).json({ error: "No valid artwork IDs provided" });
-      }
 
-      const newTour = {
-        user_id: userId,
-        tour_name,
-        city,
-        description: description || "",
-        artworks: processedArtworks,
-        created_at: new Date(),
-        last_updated: new Date(),
-        visibility: visibility || "public"
-      };
+        const newTour = {
+          user_id: userId,
+          tour_name,
+          city,
+          description: description || "",
+          artworks: processedArtworks,
+          created_at: new Date(),
+          last_updated: new Date(),
+          visibility: visibility || "public"
+        };
 
-      console.log('[API] Saving new tour to database:', {
-        tourName: newTour.tour_name,
-        city: newTour.city,
-        artworksCount: newTour.artworks.length
-      });
-      
-      const result = await db.collection("tours").insertOne(newTour);
-      await db.collection("users").updateOne(
-        { _id: new ObjectId(userId) },
-        { $push: { created_tours: result.insertedId } }
-      );
-      
-      console.log('[API] Tour saved successfully with ID:', result.insertedId);
-      
-      // Try to update user record if users collection exists
-      try {
-        const collections = await db.listCollections({name: "users"}).toArray();
-        if (collections.length > 0) {
-          // Update or create user record
-          console.log('[API] Updating user record for user_id:', user_id);
-          await db.collection("users").updateOne(
-            { user_id: user_id },
-            { 
-              $addToSet: { created_tours: result.insertedId },
-              $setOnInsert: { 
-                username: user_id,
-                profile_created_at: new Date()
-              }
-            },
-            { upsert: true }
-          );
-          console.log('[API] User record updated successfully');
-        }
-      } catch (userError) {
-        console.warn("Could not update user record:", userError.message);
+        console.log('[API] Saving new tour to database:', {
+          tourName: newTour.tour_name,
+          city: newTour.city,
+          artworksCount: newTour.artworks.length
+        });
+        
+        const result = await db.collection("tours").insertOne(newTour);
+        await db.collection("users").updateOne(
+          { _id: new ObjectId(userId) },
+          { $push: { created_tours: result.insertedId } }
+        );
+        
+        console.log('[API] Tour saved successfully with ID:', result.insertedId);
+        
+        // Try to update user record if users collection exists
+        // This section is already handled above with the proper userId as ObjectId
+        // The redundant user update is removed to avoid confusion
+        
+        return res.status(201).json({ 
+          message: "Tour created", 
+          tour: {
+            ...newTour,
+            _id: result.insertedId
+          }
+        });
+      } catch (jwtError) {
+        console.error("JWT verification error:", jwtError);
+        return res.status(401).json({ error: "Invalid or expired token" });
       }
-      
-      return res.status(201).json({ 
-        message: "Tour created", 
-        tour: {
-          ...newTour,
-          _id: result.insertedId
-        }
-      });
     } catch (error) {
       console.error("Error creating tour:", error);
       return res.status(500).json({ error: error.message });

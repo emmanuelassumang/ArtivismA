@@ -20,7 +20,9 @@ export default function Login() {
   
     if (res.ok) {
       localStorage.setItem("token", data.token);
-      window.location.href = "/map";
+      // Get user ID from JWT
+      const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
+      window.location.href = `/profile/${tokenPayload.userId}`;
     } else {
       console.error("Log in failed:", data);
       alert(`Log in failed: ${data.error || "Try again."}`);

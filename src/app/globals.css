@@ -4,20 +4,59 @@
 @import "leaflet/dist/leaflet.css";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #18181b;
+  --foreground: #fafafa;
   --primary: #4f46e5;
   --primary-dark: #4338ca;
   --primary-light: #818cf8;
   --accent: #f43f5e;
   --accent-dark: #e11d48;
   --accent-light: #fb7185;
+  --card-bg: #27272a;
+  --card-hover: #3f3f46;
+  --nav-bg: rgba(24, 24, 27, 0.9);
+  --input-bg: #3f3f46;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Accessibility - Greyscale Mode */
+.greyscale {
+  filter: grayscale(100%);
+  -webkit-filter: grayscale(100%);
+  -moz-filter: grayscale(100%);
+  -ms-filter: grayscale(100%);
+  -o-filter: grayscale(100%);
+  transition: filter 0.3s ease;
+}
+
+/* Light theme variables */
+:root.light, [data-theme="light"] {
+  --background: #fafafa;
+  --foreground: #18181b;
+  --card-bg: #ffffff;
+  --card-hover: #f4f4f5;
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  --input-bg: #f4f4f5;
+}
+
+/* Dark theme variables */
+:root.dark, [data-theme="dark"] {
+  --background: #18181b;
+  --foreground: #fafafa;
+  --card-bg: #27272a;
+  --card-hover: #3f3f46;
+  --nav-bg: rgba(24, 24, 27, 0.9);
+  --input-bg: #3f3f46;
+}
+
+/* For backwards compatibility */
+@media (prefers-color-scheme: light) {
+  :root:not(.dark):not(.light) {
+    --background: #fafafa;
+    --foreground: #18181b;
+    --card-bg: #ffffff;
+    --card-hover: #f4f4f5;
+    --nav-bg: rgba(255, 255, 255, 0.9);
+    --input-bg: #f4f4f5;
   }
 }
 
@@ -29,18 +68,18 @@ body {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 5px;
+  background: var(--card-bg);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 5px;
+  background: #666;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -59,9 +98,11 @@ body {
 
 /* Map and Marker customizations */
 .leaflet-popup-content-wrapper {
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   overflow: hidden;
+  background: var(--card-bg);
+  color: var(--foreground);
 }
 
 .leaflet-popup-content {
@@ -80,7 +121,7 @@ body {
 
 /* Button animations */
 .btn-primary {
-  @apply bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-6 rounded-lg transition-all duration-300;
+  @apply bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-6 rounded-md transition-all duration-300;
   position: relative;
   overflow: hidden;
 }
@@ -116,13 +157,19 @@ body {
 
 /* Card styles */
 .art-card {
-  @apply bg-white rounded-lg overflow-hidden shadow-sm transition-all duration-300;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  @apply bg-card-bg rounded-md overflow-hidden transition-all duration-300;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .art-card:hover {
-  @apply shadow-md;
+  @apply shadow-lg;
   transform: translateY(-2px);
+  background: var(--card-hover);
+}
+
+/* Toggle button styles */
+.toggle-switch .toggle-dot {
+  transition: transform 0.3s ease;
 }
 
 /* Page transitions */
@@ -144,4 +191,96 @@ body {
 .page-transition-exit-active {
   opacity: 0;
   transition: opacity 300ms;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* StreetArtCities-inspired components */
+
+.grid-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.art-card-minimal {
+  position: relative;
+  aspect-ratio: 1/1;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.art-card-minimal img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.art-card-minimal:hover img {
+  transform: scale(1.05);
+}
+
+.art-card-minimal .overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+  padding: 16px;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.art-card-minimal:hover .overlay {
+  opacity: 1;
+}
+
+.profile-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.stat-card {
+  @apply bg-card-bg rounded-md p-4;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.filter-chip {
+  @apply px-3 py-1 rounded-full text-sm transition-colors;
+  background: var(--input-bg);
+}
+
+.filter-chip:hover, .filter-chip.active {
+  @apply bg-indigo-600 text-white;
+}
+
+.input-dark {
+  @apply py-2 px-3 rounded-md;
+  background: var(--input-bg);
+  color: var(--foreground);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-gradient {
+  background: linear-gradient(to right, var(--primary-dark), var(--primary));
+  padding: 60px 0;
+  margin-bottom: 40px;
+  color: white;
 }

@@ -1,7 +1,7 @@
 import {faker} from "@faker-js/faker"
 import {MongoClient, ObjectId} from "mongodb"
 import dotenv from "dotenv";
-dotenv.config({path:"/Users/giangpham/Desktop/A-Atlas/.env"}) //would need to change path for your own computer
+dotenv.config();
 
 function randomIntFromInterval(min, max) { // min and max included 
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -64,21 +64,63 @@ async function seedDB(){
 
         const arts = []
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 15; i++) {
             const city = faker.helpers.arrayElement(["New York", "Berlin"]); // Randomly assign city
+
+            // Generate varied accessibility features
+            // Make sure we have some of each accessibility type in our demo data
+            let accessibility;
+            if (i < 4) {
+                // First 4 artworks: Make sure each accessibility feature is represented
+                accessibility = {
+                    wheelchair_accessible: i === 0 || i === 3,
+                    audio_descriptions: i === 1 || i === 3,
+                    low_mobility_friendly: i === 2 || i === 3,
+                    child_friendly: i === 0 || i === 2
+                };
+            } else if (i < 8) {
+                // Next 4: Random mix of features but at least one
+                const features = ["wheelchair_accessible", "audio_descriptions", "low_mobility_friendly", "child_friendly"];
+                const selectedFeatures = getRandomSubset(features, randomIntFromInterval(1, 3));
+                
+                accessibility = {
+                    wheelchair_accessible: selectedFeatures.includes("wheelchair_accessible"),
+                    audio_descriptions: selectedFeatures.includes("audio_descriptions"),
+                    low_mobility_friendly: selectedFeatures.includes("low_mobility_friendly"),
+                    child_friendly: selectedFeatures.includes("child_friendly")
+                };
+            } else if (i < 12) {
+                // Next 4: All have all accessibility features
+                accessibility = {
+                    wheelchair_accessible: true,
+                    audio_descriptions: true,
+                    low_mobility_friendly: true,
+                    child_friendly: true
+                };
+            } else {
+                // Last few: No accessibility features
+                accessibility = {
+                    wheelchair_accessible: false,
+                    audio_descriptions: false,
+                    low_mobility_friendly: false,
+                    child_friendly: false
+                };
+            }
 
             const art = {
                 _id: new ObjectId(),
                 image_url: faker.image.url(),
+                artwork_url: faker.image.url(),
                 location: {
                     coordinates: [faker.location.longitude(), faker.location.latitude()],
                     city: city
                 },
-
                 artist: faker.person.fullName(),
                 name: faker.word.words(3),
+                description: faker.lorem.paragraph(),
                 themes: getRandomSubset(themesList, randomIntFromInterval(1, 3)),
                 created_at: faker.date.past(),
+                accessibility: accessibility,
                 interactions: {
                     likes_count: randomIntFromInterval(0, 100),
                     comments: Array.from({ length: randomIntFromInterval(0, 5) }).map(() => ({

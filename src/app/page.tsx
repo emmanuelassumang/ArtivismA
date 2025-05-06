@@ -93,15 +93,16 @@ export default function Home() {
     <main className="min-h-screen">
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center text-white overflow-hidden">
-        {/* Background with animated gradients */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-indigo-900 via-violet-900 to-purple-900">
-          {/* Animated patterns */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-1/4 left-1/4 w-72 h-72 rounded-full bg-indigo-600/30 animate-pulse"></div>
-            <div className="absolute top-3/4 left-1/3 w-40 h-40 rounded-full bg-purple-500/20 animate-pulse" style={{ animationDelay: '1s' }}></div>
-            <div className="absolute top-1/2 right-1/4 w-56 h-56 rounded-full bg-blue-500/30 animate-pulse" style={{ animationDelay: '2s' }}></div>
-            <div className="absolute bottom-1/4 right-1/3 w-48 h-48 rounded-full bg-pink-500/20 animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-          </div>
+        {/* Background with street art graffiti image */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-black/50"></div> {/* Overlay to darken image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center" 
+            style={{ 
+              backgroundImage: 'url("/backgroundimage.webp")',
+              backgroundPosition: 'center'
+            }}
+          ></div>
           
           {/* Subtle pattern overlay */}
           <div className="absolute inset-0 opacity-10" style={{ 
@@ -111,11 +112,11 @@ export default function Home() {
         
         <div className="container mx-auto px-6 relative z-10 text-center">
           <h1 className="text-5xl md:text-7xl font-bold mb-8 tracking-tight">
-            <span className="block animate-slide-in-bottom" style={{ animationDelay: '0.3s' }}>Discover Street Art</span>
-            <span className="block text-indigo-300 animate-slide-in-bottom" style={{ animationDelay: '0.6s' }}>Around the World</span>
+            <span className="block animate-slide-in-bottom" style={{ animationDelay: '0.3s' }}>Art That Speaks</span>
+            <span className="block text-pink-300 animate-slide-in-bottom" style={{ animationDelay: '0.6s' }}>Beyond Boundaries</span>
           </h1>
           <p className="max-w-2xl mx-auto text-xl md:text-2xl mb-12 text-gray-200 animate-fade-in" style={{ animationDelay: '0.9s' }}>
-            Explore urban art that tells stories, challenges perspectives, and transforms public spaces.
+            Immerse yourself in a vibrant collage of urban expression, where street art challenges conventions and redefines public spaces.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '1.2s' }}>
             <Link href="/map" className="btn-primary py-3 px-8 rounded-lg text-lg font-medium flex items-center justify-center">
@@ -218,8 +219,8 @@ export default function Home() {
               <span className="absolute -bottom-2 left-0 w-full h-1 bg-indigo-600"></span>
             </h2>
             <p className="text-lg text-gray-700 leading-relaxed">
-              Artivism combines art and activism to create social change and raise awareness about important issues. 
-              Our platform maps street art, murals, and public installations that tell powerful stories and inspire communities.
+              Artivism fuses visual expression with social consciousness, creating powerful statements in public spaces.
+              Our platform celebrates these vibrant collages of culture that challenge norms, amplify voices, and transform communities through artistic innovation.
             </p>
           </div>
           
@@ -305,9 +306,9 @@ export default function Home() {
             isVisible.cta ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
         >
-          <h2 className="text-4xl font-bold mb-8">Ready to explore street art?</h2>
+          <h2 className="text-4xl font-bold mb-8">Ready to dive into artistic revolution?</h2>
           <p className="text-xl max-w-2xl mx-auto mb-12 text-indigo-100">
-            Discover urban art and activism that's transforming public spaces around the world.
+            Experience a kaleidoscope of creative rebellion that's reshaping our visual landscape and cultural dialogue.
           </p>
           <Link href="/map" className="group bg-white text-indigo-800 hover:bg-indigo-100 py-4 px-10 rounded-full text-lg font-medium transition-all duration-300 inline-flex items-center transform hover:scale-105 hover:shadow-lg">
             Start Exploring

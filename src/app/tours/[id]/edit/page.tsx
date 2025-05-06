@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { use } from 'react';
 
 interface Artwork {
   _id: string;
@@ -32,10 +31,14 @@ interface Tour {
   artwork_details?: Artwork[];
 }
 
-export default function EditTourPage({ params }: { params: { id: string } | Promise<{ id: string }> }) {
-  // Unwrap params if it's a Promise
-  const resolvedParams = use(params);
-  const tourId = resolvedParams.id;
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default function EditTourPage({ params }: PageProps) {
+  const tourId = params.id;
   const router = useRouter();
   
   const [tour, setTour] = useState<Tour | null>(null);

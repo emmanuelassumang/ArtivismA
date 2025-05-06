@@ -48,17 +48,13 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        isLightBgPage ? "bg-white/95 backdrop-blur-sm text-gray-900 shadow-lg" : "bg-transparent text-white"
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-nav-bg backdrop-blur-md"
     >
-      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+      <div className="container mx-auto px-6 py-3 flex justify-between items-center">
         {/* Logo */}
         <Link
           href="/"
-          className={`text-2xl font-bold transition-all duration-300 transform hover:scale-105 ${
-            isLightBgPage ? "text-indigo-700" : "text-white"
-          }`}
+          className="text-2xl font-bold transition-all duration-300 transform hover:scale-105 text-indigo-600"
         >
           Artivism
         </Link>
@@ -75,9 +71,7 @@ const Navbar = () => {
             <Link
               key={link.href}
               href={link.href}
-              className={`relative py-2 px-1 transition-colors hover:text-indigo-500 ${
-                isLightBgPage ? "text-gray-800" : "text-white"
-              }`}
+              className="relative py-2 px-1 font-medium transition-colors hover:text-indigo-500"
             >
               {link.label}
             </Link>
@@ -89,7 +83,7 @@ const Navbar = () => {
           {/* Explore Map button */}
           <Link
             href="/map"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-5 rounded-lg text-sm font-semibold tracking-wide transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center h-10"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-5 rounded-md text-sm font-medium tracking-wide transition-all duration-300 hover:shadow-lg flex items-center justify-center h-9"
           >
             Explore Map
           </Link>
@@ -99,23 +93,23 @@ const Navbar = () => {
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-md flex items-center justify-center h-10 w-10"
+                className="bg-input-bg hover:bg-card-hover p-2 rounded-full transition-all duration-300 flex items-center justify-center h-9 w-9"
               >
                 <UserIcon className="h-5 w-5" />
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg">
+                <div className="absolute right-0 mt-2 w-40 bg-card-bg border border-gray-700 rounded-md shadow-xl">
                   <Link
                     href={`/profile/${userId}`}
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-2 hover:bg-card-hover"
                     onClick={() => setIsDropdownOpen(false)}
                   >
                     My Profile
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    className="w-full text-left px-4 py-2 hover:bg-card-hover"
                   >
                     Logout
                   </button>
@@ -125,7 +119,7 @@ const Navbar = () => {
           ) : (
             <Link
               href="/login"
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-md flex items-center justify-center h-10 w-10"
+              className="bg-input-bg hover:bg-card-hover p-2 rounded-full transition-all duration-300 flex items-center justify-center h-9 w-9"
             >
               <UserIcon className="h-5 w-5" />
             </Link>

@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:static": "NEXT_SKIP_TYPE_CHECK=1 next build",
+    "export": "next export",
     "start": "next start",
     "lint": "next lint"
   },

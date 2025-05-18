@@ -37,7 +37,7 @@ interface PageProps {
   };
 }
 
-export default function EditTourPage({ params }: PageProps) {
+export default function EditTourPage({ params }: { params: { id: string } }) {
   const tourId = params.id;
   const router = useRouter();
   

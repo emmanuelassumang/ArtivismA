@@ -31,12 +31,6 @@ interface Tour {
   artwork_details?: Artwork[];
 }
 
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
 export default function EditTourPage({ params }: { params: { id: string } }) {
   const tourId = params.id;
   const router = useRouter();

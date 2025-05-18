@@ -31,9 +31,7 @@ interface Tour {
   artwork_details?: Artwork[];
 }
 
-import { PageProps } from 'next';
-
-export default function EditTourPage({ params }: PageProps) {
+export default function EditTourPage({ params }: { params: { id: string } }) {
   const tourId = params.id;
   const router = useRouter();
   

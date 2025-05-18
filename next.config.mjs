@@ -6,8 +6,9 @@ const nextConfig = {
   images: {
     unoptimized: true, // Required for static export
   },
-  basePath: '/Artivism', // Repo name for GitHub Pages
-  assetPrefix: '/Artivism/', // Prefix for assets
+  basePath: '/ArtivismA', // Repo name for GitHub Pages (case sensitive)
+  assetPrefix: '/ArtivismA/', // Prefix for assets (case sensitive)
+  trailingSlash: true, // Add trailing slashes to URLs
   webpack: (config) => {
     // Handle SVG files
     config.module.rules.push({
